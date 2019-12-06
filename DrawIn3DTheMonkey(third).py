@@ -24,4 +24,3 @@ surf = mlab.pipeline.surface(mesh)
 mlab.view(0, 2000, -2500)
 
 mlab.show()
-w
