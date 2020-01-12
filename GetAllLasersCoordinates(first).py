@@ -1,8 +1,10 @@
 from PIL import Image
 import numpy as np
+import time
 import json
 import os
 
+before = time.time()
 pathRight = "scanRight"
 pathLeft = "scanLeft"
 directoryRight = os.listdir(pathRight)
@@ -22,30 +24,35 @@ for i in range(0, len(directoryRight)):
     imLeft = Image.open(pathLeft + "\\" + directoryLeft[i])
     imLeft = np.array(imLeft)
 
-    c = 0
-    while c < len(imRight):
-        d = 0
-        while d < len(imRight[c]):
-            listeRight = imRight[c][d]
-            if 255 + 80 <= sum(listeRight) <= 255 + 300:
-                if i <= len(directoryRight)/2 - 1:
-                    laser_x += [d]
-                else:
-                    laser_z += [d]
-                    laser_y += [c]
-            listeLeft = imLeft[c][d]
-            if 255 + 80 <= sum(listeLeft) <= 255 + 300:
-                if i <= len(directoryRight)/2 - 1:
-                    laser_z += [1920-d]
-                    laser_y += [c]
-                else:
-                    laser_x += [d]
-            d += 1
-        c += 1
+    right = np.sum(imRight, axis=2)
+    red = np.where((255 + 80 <= right) & (right <= 255 + 300))
+    for j in red[0]:
+        if not i <= len(directoryRight) / 2 - 1:
+            laser_y += [int(j)]
+
+    for j in red[1]:
+        if i <= len(directoryRight) / 2 - 1:
+            laser_x += [int(j)]
+        else:
+            laser_z += [int(j)]
+
+    left = np.sum(imLeft, axis=2)
+    red = np.where((255 + 80 <= left) & (left <= 255 + 300))
+    for j in red[0]:
+        if i <= len(directoryRight) / 2 - 1:
+            laser_y += [int(j)]
+    for j in red[1]:
+        if i <= len(directoryRight) / 2 - 1:
+            laser_z += [1920 - int(j)]
+        else:
+            laser_x += [int(j)]
 
     laser_x_tot += [laser_x]
     laser_y_tot += [laser_y]
     laser_z_tot += [laser_z]
 
+print(laser_x_tot)
+
 lasers = {"laser_x_tot": laser_x_tot, "laser_y_tot": laser_y_tot, "laser_z_tot": laser_z_tot}
 open("lasers.txt", "w").write(json.dumps(lasers))
+print(time.time()-before)

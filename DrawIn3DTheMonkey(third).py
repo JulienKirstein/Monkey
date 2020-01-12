@@ -19,6 +19,10 @@ pts = mlab.points3d(x, y, z, z, scale_mode='none', scale_factor=0.1)
 
 # Create and visualize the mesh
 mesh = mlab.pipeline.delaunay2d(pts)
+
+mq = mlab.pipeline.user_defined(mesh, filter='MeshQuality')
+mesh = mlab.pipeline.cell_to_point_data(mq)
+mesh = mlab.pipeline.threshold(mesh, up=125)
 surf = mlab.pipeline.surface(mesh)
 
 mlab.view(0, 2000, -2500)
